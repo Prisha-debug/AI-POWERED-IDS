@@ -1,53 +1,55 @@
-/* Custom SOC Dashboard Styling Extensions */
+/* Light Theme SOC Dashboard Custom Extensions */
 
 body {
-    background-color: #0b0f19;
-    color: #e2e8f0;
+    background-color: #f8fafc;
+    color: #334155;
 }
 
-/* SOC Glass/Card Styling */
+/* SOC Glass / Elevated White Cards */
 .soc-card {
-    background-color: #111726;
-    border: 1px solid #1e293b;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .kpi-card {
-    background-color: #111726;
-    border: 1px solid #1e293b;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
     padding: 1.25rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    transition: border-color 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpi-card:hover {
-    border-color: #334155;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* Active Navigation Tab Styling */
 .nav-tab.active-tab {
-    background-color: #1e293b;
-    color: #34d399;
-    border: 1px solid #334155;
+    background-color: #f1f5f9;
+    color: #0284c7;
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
 }
 
-/* Custom Scrollbars */
+/* Scrollbar Customization for Light Mode */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #cbd5e1;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #94a3b8;
 }
