@@ -10,63 +10,61 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <!-- Custom CSS -->
+    <!-- Custom Light Theme CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
     <!-- Top Navigation Header -->
-    <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div class="w-9 h-9 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
                 <i data-lucide="shield-alert" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg tracking-wide text-slate-100 flex items-center gap-2">
-                    SentinelAI <span class="text-xs font-mono font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SOC v2.4</span>
+                <h1 class="font-bold text-lg tracking-wide text-slate-900 flex items-center gap-2">
+                    SentinelAI <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">SOC v2.4</span>
                 </h1>
-                <p class="text-xs text-slate-400">Intelligent Threat Detection. Clear Security Insights.</p>
+                <p class="text-xs text-slate-500">Intelligent Threat Detection. Clear Security Insights.</p>
             </div>
         </div>
 
         <!-- System Controls Bar -->
         <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-2 bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-slate-300">STREAM: <strong id="stream-status" class="text-emerald-400">ACTIVE</strong></span>
-                <span class="text-slate-600">|</span>
-                <span class="text-slate-400">EPS: <strong id="eps-counter" class="text-slate-200">24</strong></span>
+            <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-slate-700">STREAM: <strong id="stream-status" class="text-emerald-600">ACTIVE</strong></span>
+                <span class="text-slate-300">|</span>
+                <span class="text-slate-500">EPS: <strong id="eps-counter" class="text-slate-800">24</strong></span>
             </div>
 
-            <!-- Controls -->
-            <button id="btn-toggle-stream" onclick="toggleStream()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition flex items-center gap-1.5 border border-slate-700">
-                <i data-lucide="pause" class="w-3.5 h-3.5 text-amber-400" id="stream-icon"></i>
+            <button id="btn-toggle-stream" onclick="toggleStream()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 border border-slate-300 shadow-sm">
+                <i data-lucide="pause" class="w-3.5 h-3.5 text-amber-500" id="stream-icon"></i>
                 <span id="stream-btn-text">Pause Stream</span>
             </button>
 
-            <!-- Jury Demo Guide Trigger -->
-            <button onclick="openModal('modal-jury-guide')" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition flex items-center gap-1.5">
-                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <button onclick="openModal('modal-jury-guide')" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-600"></i>
                 <span>Jury Demo Guide</span>
             </button>
         </div>
     </header>
 
     <!-- Main SOC Navigation Tabs -->
-    <nav class="bg-slate-900/50 border-b border-slate-800/80 px-6 py-2 flex items-center space-x-1 text-xs font-medium overflow-x-auto">
+    <nav class="bg-white border-b border-slate-200 px-6 py-2 flex items-center space-x-1 text-xs font-medium overflow-x-auto">
         <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab active-tab flex items-center gap-2 px-3.5 py-2 rounded-md transition">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i> SOC Dashboard
         </button>
-        <button onclick="switchTab('telemetry')" id="tab-telemetry" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+        <button onclick="switchTab('telemetry')" id="tab-telemetry" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
             <i data-lucide="activity" class="w-4 h-4"></i> Traffic Telemetry
         </button>
-        <button onclick="switchTab('ai-engine')" id="tab-ai-engine" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+        <button onclick="switchTab('ai-engine')" id="tab-ai-engine" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
             <i data-lucide="cpu" class="w-4 h-4"></i> AI Anomaly Engine
         </button>
-        <button onclick="switchTab('rule-engine')" id="tab-rule-engine" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+        <button onclick="switchTab('rule-engine')" id="tab-rule-engine" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
             <i data-lucide="file-code" class="w-4 h-4"></i> Signature Rule Builder
         </button>
-        <button onclick="switchTab('response')" id="tab-response" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+        <button onclick="switchTab('response')" id="tab-response" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
             <i data-lucide="shield-ban" class="w-4 h-4"></i> Incident Response
         </button>
     </nav>
@@ -81,14 +79,14 @@
                 <div class="kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Flows Analyzed</p>
-                            <h3 id="kpi-total-flows" class="text-2xl font-bold text-slate-100 font-mono mt-1">1,248</h3>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Flows Analyzed</p>
+                            <h3 id="kpi-total-flows" class="text-2xl font-bold text-slate-900 font-mono mt-1">1,248</h3>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-800 text-slate-300">
+                        <div class="p-2 rounded-lg bg-slate-100 text-slate-700">
                             <i data-lucide="network" class="w-5 h-5"></i>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center text-xs text-emerald-400 gap-1 font-mono">
+                    <div class="mt-3 flex items-center text-xs text-emerald-600 gap-1 font-mono font-medium">
                         <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Live Telemetry Stream
                     </div>
                 </div>
@@ -96,14 +94,14 @@
                 <div class="kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Normal Baseline Traffic</p>
-                            <h3 id="kpi-normal-flows" class="text-2xl font-bold text-emerald-400 font-mono mt-1">1,180</h3>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Normal Baseline Traffic</p>
+                            <h3 id="kpi-normal-flows" class="text-2xl font-bold text-emerald-600 font-mono mt-1">1,180</h3>
                         </div>
-                        <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
                             <i data-lucide="check-circle" class="w-5 h-5"></i>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center text-xs text-slate-400 gap-1 font-mono">
+                    <div class="mt-3 flex items-center text-xs text-slate-500 gap-1 font-mono">
                         <span id="kpi-normal-pct">94.5%</span> of total volume
                     </div>
                 </div>
@@ -111,14 +109,14 @@
                 <div class="kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Suspicious / Medium Risk</p>
-                            <h3 id="kpi-suspicious-flows" class="text-2xl font-bold text-amber-400 font-mono mt-1">42</h3>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Suspicious / Medium Risk</p>
+                            <h3 id="kpi-suspicious-flows" class="text-2xl font-bold text-amber-600 font-mono mt-1">42</h3>
                         </div>
-                        <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                        <div class="p-2 rounded-lg bg-amber-50 text-amber-600">
                             <i data-lucide="alert-triangle" class="w-5 h-5"></i>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center text-xs text-amber-400 gap-1 font-mono">
+                    <div class="mt-3 flex items-center text-xs text-amber-600 gap-1 font-mono font-medium">
                         Anomaly score > 0.65
                     </div>
                 </div>
@@ -126,41 +124,41 @@
                 <div class="kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Critical Threat Alerts</p>
-                            <h3 id="kpi-critical-flows" class="text-2xl font-bold text-rose-400 font-mono mt-1">26</h3>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Critical Threat Alerts</p>
+                            <h3 id="kpi-critical-flows" class="text-2xl font-bold text-rose-600 font-mono mt-1">26</h3>
                         </div>
-                        <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+                        <div class="p-2 rounded-lg bg-rose-50 text-rose-600">
                             <i data-lucide="shield-alert" class="w-5 h-5"></i>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center text-xs text-rose-400 gap-1 font-mono">
+                    <div class="mt-3 flex items-center text-xs text-rose-600 gap-1 font-mono font-medium">
                         Rule match + Anomaly score > 0.85
                     </div>
                 </div>
             </div>
 
             <!-- Interactive Attack Simulator Banner -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+            <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
                 <div class="flex items-center space-x-3">
-                    <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    <div class="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-200">
                         <i data-lucide="zap" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-slate-200">Jury Interactive Attack Simulator</h4>
-                        <p class="text-xs text-slate-400">Inject simulated cyber attacks into the live telemetry stream to test AI detection.</p>
+                        <h4 class="text-sm font-semibold text-slate-900">Jury Interactive Attack Simulator</h4>
+                        <p class="text-xs text-slate-500">Inject simulated cyber attacks into the live telemetry stream to test AI detection.</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="injectAttack('syn_flood')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/50 hover:text-rose-300 hover:border-rose-700/50 text-slate-300 text-xs font-mono border border-slate-700 transition">
+                    <button onclick="injectAttack('syn_flood')" class="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-700 text-xs font-mono border border-slate-300 shadow-sm transition">
                         ⚡ SYN Flood
                     </button>
-                    <button onclick="injectAttack('port_scan')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-950/50 hover:text-amber-300 hover:border-amber-700/50 text-slate-300 text-xs font-mono border border-slate-700 transition">
+                    <button onclick="injectAttack('port_scan')" class="px-3 py-1.5 rounded-lg bg-white hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 text-slate-700 text-xs font-mono border border-slate-300 shadow-sm transition">
                         🔍 Port Scan
                     </button>
-                    <button onclick="injectAttack('ssh_brute')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-950/50 hover:text-purple-300 hover:border-purple-700/50 text-slate-300 text-xs font-mono border border-slate-700 transition">
+                    <button onclick="injectAttack('ssh_brute')" class="px-3 py-1.5 rounded-lg bg-white hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 text-slate-700 text-xs font-mono border border-slate-300 shadow-sm transition">
                         🔑 SSH Brute Force
                     </button>
-                    <button onclick="injectAttack('c2_beacon')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-950/50 hover:text-cyan-300 hover:border-cyan-700/50 text-slate-300 text-xs font-mono border border-slate-700 transition">
+                    <button onclick="injectAttack('c2_beacon')" class="px-3 py-1.5 rounded-lg bg-white hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 text-slate-700 text-xs font-mono border border-slate-300 shadow-sm transition">
                         📡 C2 Beacon
                     </button>
                 </div>
@@ -171,10 +169,10 @@
                 <!-- Real-time Flow Velocity Chart -->
                 <div class="lg:col-span-2 soc-card p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <i data-lucide="line-chart" class="w-4 h-4 text-emerald-400"></i> Real-time Network Flow Volume (Packets / Sec)
+                        <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="line-chart" class="w-4 h-4 text-sky-600"></i> Real-time Network Flow Volume (Packets / Sec)
                         </h3>
-                        <span class="text-xs font-mono text-slate-400">Live Window: 60s</span>
+                        <span class="text-xs font-mono text-slate-500">Live Window: 60s</span>
                     </div>
                     <div id="chart-flow-rate" class="h-64 w-full"></div>
                 </div>
@@ -182,8 +180,8 @@
                 <!-- Threat Category Distribution -->
                 <div class="soc-card p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i> Threat Classification Breakdown
+                        <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-sky-600"></i> Threat Classification Breakdown
                         </h3>
                     </div>
                     <div id="chart-threat-pie" class="h-64 w-full"></div>
@@ -195,15 +193,15 @@
                 <!-- HTML5 Canvas Interactive Topology -->
                 <div class="lg:col-span-2 soc-card p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i> Live Network Topology & Threat Vectors
+                        <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="share-2" class="w-4 h-4 text-sky-600"></i> Live Network Topology & Threat Vectors
                         </h3>
-                        <div class="text-xs font-mono text-slate-400 flex items-center gap-3">
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Internal</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span> Threat Vector</span>
+                        <div class="text-xs font-mono text-slate-500 flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Internal</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Threat Vector</span>
                         </div>
                     </div>
-                    <div class="relative bg-slate-950/80 rounded-lg border border-slate-800 overflow-hidden h-72">
+                    <div class="relative bg-slate-900 rounded-lg border border-slate-200 overflow-hidden h-72">
                         <canvas id="topology-canvas" class="w-full h-full cursor-crosshair"></canvas>
                     </div>
                 </div>
@@ -211,13 +209,13 @@
                 <!-- Live Security Alert Feed -->
                 <div class="soc-card p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Critical Security Feed
+                        <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="bell" class="w-4 h-4 text-rose-600"></i> Critical Security Feed
                         </h3>
-                        <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">LIVE</span>
+                        <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200 font-semibold">LIVE</span>
                     </div>
                     <div id="alert-feed" class="space-y-2.5 overflow-y-auto max-h-64 pr-1 font-mono text-xs">
-                        <!-- Alert items injected dynamically -->
+                        <!-- Injected dynamically -->
                     </div>
                 </div>
             </div>
@@ -228,12 +226,12 @@
             <div class="soc-card p-5">
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                     <div>
-                        <h3 class="text-base font-semibold text-slate-200">Network Flow Telemetry Inspector</h3>
-                        <p class="text-xs text-slate-400">Filter, search, and click individual flows for deep packet inspection.</p>
+                        <h3 class="text-base font-semibold text-slate-900">Network Flow Telemetry Inspector</h3>
+                        <p class="text-xs text-slate-500">Filter, search, and click individual flows for deep packet inspection.</p>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <input type="text" id="telemetry-search" oninput="filterTelemetry()" placeholder="Filter IP, Port, or Protocol..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 w-64">
-                        <select id="telemetry-severity-filter" onchange="filterTelemetry()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                        <input type="text" id="telemetry-search" oninput="filterTelemetry()" placeholder="Filter IP, Port, or Protocol..." class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500 w-64 shadow-sm">
+                        <select id="telemetry-severity-filter" onchange="filterTelemetry()" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500 shadow-sm">
                             <option value="ALL">All Severities</option>
                             <option value="HIGH">High / Critical Only</option>
                             <option value="SUSPICIOUS">Suspicious Only</option>
@@ -245,7 +243,7 @@
                 <!-- Telemetry Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left font-mono text-xs">
-                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+                        <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase tracking-wider">
                             <tr>
                                 <th class="p-3">Timestamp</th>
                                 <th class="p-3">Source IP</th>
@@ -259,7 +257,7 @@
                                 <th class="p-3 text-right">Inspect</th>
                             </tr>
                         </thead>
-                        <tbody id="telemetry-table-body" class="divide-y divide-slate-800/60">
+                        <tbody id="telemetry-table-body" class="divide-y divide-slate-100">
                             <!-- Injected dynamically -->
                         </tbody>
                     </table>
@@ -272,61 +270,109 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Sensitivity Controls -->
                 <div class="soc-card p-5 space-y-4">
-                    <h3 class="text-base font-semibold text-slate-200 flex items-center gap-2">
-                        <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i> Model Sensitivity & Scoring Threshold
+                    <h3 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-sky-600"></i> Model Sensitivity Threshold
                     </h3>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Adjust the mathematical boundary threshold used by the Isolation Forest simulator. Higher sensitivity catches subtle anomalies but may increase False Positives.
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Adjust the mathematical boundary threshold used by the Isolation Forest simulator.
                     </p>
 
                     <div class="space-y-2 pt-2">
                         <div class="flex justify-between text-xs font-mono">
-                            <span class="text-slate-400">Anomaly Decision Cutoff:</span>
-                            <span id="threshold-val-label" class="text-emerald-400 font-bold">0.65</span>
+                            <span class="text-slate-600">Anomaly Cutoff:</span>
+                            <span id="threshold-val-label" class="text-sky-600 font-bold">0.65</span>
                         </div>
-                        <input type="range" id="slider-threshold" min="0.30" max="0.95" step="0.05" value="0.65" oninput="updateSensitivityThreshold(this.value)" class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500 border border-slate-800">
-                        <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                            <span>0.30 (Aggressive)</span>
-                            <span>0.65 (Balanced)</span>
-                            <span>0.95 (Strict)</span>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-slate-800 pt-4 space-y-3">
-                        <h4 class="text-xs font-semibold text-slate-300">Feature Vector Weight Distribution</h4>
-                        <div class="space-y-2 font-mono text-xs">
-                            <div>
-                                <div class="flex justify-between text-[11px] mb-1">
-                                    <span class="text-slate-400">Packet Volumetric Rate (Z-Score)</span>
-                                    <span class="text-slate-300">35%</span>
-                                </div>
-                                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full w-[35%]"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[11px] mb-1">
-                                    <span class="text-slate-400">Byte Density Variance</span>
-                                    <span class="text-slate-300">25%</span>
-                                </div>
-                                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden"><div class="bg-indigo-500 h-full w-[25%]"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[11px] mb-1">
-                                    <span class="text-slate-400">TCP Flag Anomaly Bitmask</span>
-                                    <span class="text-slate-300">25%</span>
-                                </div>
-                                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden"><div class="bg-amber-500 h-full w-[25%]"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[11px] mb-1">
-                                    <span class="text-slate-400">Port Entropy & Frequency</span>
-                                    <span class="text-slate-300">15%</span>
-                                </div>
-                                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden"><div class="bg-rose-500 h-full w-[15%]"></div></div>
-                            </div>
-                        </div>
+                        <input type="range" id="slider-threshold" min="0.30" max="0.95" step="0.05" value="0.65" oninput="updateSensitivityThreshold(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
                     </div>
                 </div>
 
                 <!-- Feature Scatter Plot -->
                 <div class="lg:col-span-2 soc-card p-5">
-                    <h3 class="text-base font-semibold text-
+                    <h3 class="text-base font-semibold text-slate-900 mb-2">2D Feature Space Anomaly Separation</h3>
+                    <div id="chart-scatter-space" class="h-72 w-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: RULE ENGINE -->
+        <section id="view-rule-engine" class="tab-content hidden space-y-6">
+            <div class="soc-card p-5">
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Active Rule Set</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left font-mono text-xs">
+                        <thead class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                            <tr>
+                                <th class="p-2.5">Rule ID</th>
+                                <th class="p-2.5">Message / Threat Name</th>
+                                <th class="p-2.5">Protocol</th>
+                                <th class="p-2.5">Condition</th>
+                                <th class="p-2.5">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rules-table-body" class="divide-y divide-slate-100">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: INCIDENT RESPONSE -->
+        <section id="view-response" class="tab-content hidden space-y-6">
+            <div class="soc-card p-5 space-y-4">
+                <h3 class="text-base font-semibold text-slate-900">Quarantined IP Addresses</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left font-mono text-xs">
+                        <thead class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Blocked IP</th>
+                                <th class="p-3">Reason</th>
+                                <th class="p-3">Generated iptables Rule</th>
+                                <th class="p-3">Generated UFW Rule</th>
+                                <th class="p-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quarantine-table-body" class="divide-y divide-slate-100">
+                            <!-- Quarantines injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Inspection Modal -->
+    <div id="modal-flow-inspect" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full p-6 space-y-4 shadow-xl relative">
+            <button onclick="closeModal('modal-flow-inspect')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="search" class="w-4 h-4 text-sky-600"></i> Flow Inspector & Packet Payload
+            </h3>
+            <div id="modal-flow-content" class="space-y-3 font-mono text-xs">
+                <!-- Content injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Jury Presentation Guide Modal -->
+    <div id="modal-jury-guide" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full p-6 space-y-4 shadow-xl relative">
+            <button onclick="closeModal('modal-jury-guide')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-2">
+                <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600"></i> Jury Demo Walkthrough
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Use the attack injection buttons at the top to simulate live cyber threats, adjust sensitivity thresholds, and show automated IP quarantine generation!
+            </p>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
