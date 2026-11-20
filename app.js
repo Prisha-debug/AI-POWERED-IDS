@@ -1,250 +1,112 @@
-/* SentinelAI — Light Theme SOC & Plotly Logic */
+/* Sentinel — auth + live browser telemetry */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS=localStorage, esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const S={flows:[],lat:[],blocked:[],thr:.65,on:true,c:{n:0,s:0,c:0},hosts:{},base:[],
+ rules:[{id:'R-1',name:'Slow response',field:'dur',val:'2000'},{id:'R-2',name:'Large transfer',field:'bytes',val:'1000000'}]};
 
-let streamActive = true;
-let sensitivityThreshold = 0.65;
-let flowHistory = [];
-let quarantinedIPs = [];
-let totalFlows = 1248;
-let normalFlows = 1180;
-let suspiciousFlows = 42;
-let criticalFlows = 26;
+/* ---------- auth (client-side demo) ---------- */
+const users=()=>JSON.parse(LS.getItem('sn_users')||'{}');
+async function hash(p,salt){
+  try{const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+p));
+    return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch{return btoa(salt+p)}}
+function authMode(m){$('#f-in').classList.toggle('hidden',m!=='in');$('#f-up').classList.toggle('hidden',m!=='up');
+  $('#t-in').classList.toggle('on',m==='in');$('#t-up').classList.toggle('on',m==='up')}
+async function signUp(e){e.preventDefault();const em=$('#up-email').value.trim().toLowerCase(),p=$('#up-pass').value,u=users();
+  if(p!==$('#up-pass2').value)return $('#up-err').textContent='Passwords do not match.';
+  if(u[em])return $('#up-err').textContent='An account with this email already exists.';
+  const salt=crypto.getRandomValues(new Uint32Array(4)).join('-');
+  u[em]={name:$('#up-name').value.trim(),salt,h:await hash(p,salt)};LS.setItem('sn_users',JSON.stringify(u));
+  LS.setItem('sn_session',em);boot()}
+async function signIn(e){e.preventDefault();const em=$('#in-email').value.trim().toLowerCase(),u=users()[em];
+  if(!u||u.h!==await hash($('#in-pass').value,u.salt))return $('#in-err').textContent='Email or password is incorrect.';
+  LS.setItem('sn_session',em);boot()}
+function signOut(){LS.removeItem('sn_session');location.reload()}
+let started=false;
+function boot(){const em=LS.getItem('sn_session'),u=em&&users()[em];
+  $('#auth').classList.toggle('hidden',!!u);$('#app').classList.toggle('hidden',!u);
+  if(u){$('#who').textContent=u.name;if(!started){started=true;startApp()}}}
 
-let activeRules = [
-    { id: 'RULE-01', name: 'SYN Flood Volumetric Pattern', proto: 'TCP', condition: 'Packets > 150 & Flags == SYN', status: 'ACTIVE' },
-    { id: 'RULE-02', name: 'SSH Brute Force Attempt', proto: 'TCP', condition: 'Port == 22 & Packets > 40', status: 'ACTIVE' },
-    { id: 'RULE-03', name: 'DNS Tunneling Exfiltration', proto: 'UDP', condition: 'Port == 53 & Bytes > 1500', status: 'ACTIVE' }
-];
-
-document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
-    initPlots();
-    initTopologyCanvas();
-    startTelemetryStream();
-    renderRulesTable();
-});
-
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active-tab'));
-    
-    document.getElementById(`view-${tabId}`).classList.remove('hidden');
-    document.getElementById(`tab-${tabId}`).classList.add('active-tab');
+/* ---------- live data ---------- */
+const PROBES=['https://www.cloudflare.com/cdn-cgi/trace','https://dns.google/resolve?name=example.com','https://www.google.com/generate_204','https://api.github.com/zen'];
+let pi=0,net={};
+function startApp(){
+  $$('.tab').forEach(b=>b.onclick=()=>{$$('.tab').forEach(x=>x.classList.toggle('on',x===b));
+    $$('.view').forEach(v=>v.classList.toggle('hidden',v.id!=='v-'+b.dataset.tab));draw()});
+  try{new PerformanceObserver(l=>{if(S.on)l.getEntries().forEach(ingest)}).observe({type:'resource'})}catch{}
+  fetch(PROBES[0],{cache:'no-store'}).then(r=>r.text()).then(t=>{net.trace=Object.fromEntries(t.trim().split('\n').map(l=>l.split('=')));vitals()}).catch(()=>{});
+  setInterval(probe,2000);setInterval(vitals,3000);setInterval(draw,1000);
+  navigator.getBattery?.().then(b=>{net.bat=b;vitals()});
+  addEventListener('online',vitals);addEventListener('offline',vitals);
+  renderRules();vitals();probe()}
+function probe(){if(!S.on)return;const u=PROBES[pi++%PROBES.length];
+  fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{mode:'no-cors',cache:'no-store'}).catch(()=>{
+    push({host:new URL(u).host,type:'fetch',proto:'—',bytes:0,dur:0,url:u,fail:true})})}
+function ingest(e){if(!/^https?:/.test(e.name))return;let host;try{host=new URL(e.name).host}catch{return}
+  push({host,type:e.initiatorType,proto:e.nextHopProtocol||'—',bytes:e.transferSize||e.encodedBodySize||0,dur:Math.round(e.duration),url:e.name,
+    t:{dns:Math.round(e.domainLookupEnd-e.domainLookupStart),connect:Math.round(e.connectEnd-e.connectStart),wait:Math.round(e.responseStart-e.requestStart)}})}
+function stats(){const d=S.base,n=d.length,m=d.reduce((a,b)=>a+b,0)/(n||1),sd=Math.sqrt(d.reduce((a,b)=>a+(b-m)**2,0)/(n||1));return{n,m,sd}}
+function push(f){
+  const {n,m,sd}=stats();f.id='F-'+(S.c.n+S.c.s+S.c.c+1);f.time=new Date().toLocaleTimeString();
+  const z=n<8?0:Math.abs(f.dur-m)/(sd||1);f.score=f.fail?1:+Math.min(1,.1+z/5).toFixed(2);
+  const rule=S.rules.find(r=>r.field==='host'?f.host.includes(r.val):f[r.field]>Number(r.val));
+  f.tag=f.tag||(f.fail?'Request failed':rule?rule.name:'');
+  f.status=(f.score>=S.thr+.15||f.tag)?'HIGH':f.score>=S.thr?'SUSPICIOUS':'NORMAL';
+  if(!f.sim&&!f.fail){S.base.push(f.dur);if(S.base.length>40)S.base.shift();S.lat.push(f.dur);if(S.lat.length>60)S.lat.shift()}
+  S.c[f.status==='NORMAL'?'n':f.status==='HIGH'?'c':'s']++;S.hosts[f.host]=(S.hosts[f.host]||0)+1;
+  S.flows.unshift(f);if(S.flows.length>200)S.flows.pop();
+  if(f.status==='HIGH')alertItem(f);
 }
+function inject(k){const P={flood:{host:'203.0.113.45',type:'simulated',bytes:900,dur:4800,tag:'Request flood'},
+  exfil:{host:'198.51.100.7',type:'simulated',bytes:8400000,dur:6100,tag:'Large upload'},
+  beacon:{host:'45.33.32.156',type:'simulated',bytes:420,dur:900,tag:'Beaconing'}}[k];
+  push({...P,proto:'sim',url:'(simulated) '+P.host,sim:true});draw()}
+function toggle(){S.on=!S.on;$('#pause').textContent=S.on?'Pause':'Resume';$('#live-dot').classList.toggle('off',!S.on)}
+function setThr(v){S.thr=+v;$('#thr-v').textContent=v}
 
-function startTelemetryStream() {
-    setInterval(() => {
-        if (!streamActive) return;
-        processFlow(generateRandomFlow());
-    }, 1200);
-}
+/* ---------- views ---------- */
+const med=a=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y);return s[s.length>>1]};
+function vitals(){const c=navigator.connection||{},h=performance.memory,t=net.trace||{},b=net.bat;
+  const rows=[['Connection',navigator.onLine?'online':'offline'],['Link type',c.effectiveType||'n/a'],['Downlink',c.downlink?c.downlink+' Mbps':'n/a'],
+   ['Browser RTT',c.rtt!=null?c.rtt+' ms':'n/a'],['CPU threads',navigator.hardwareConcurrency||'n/a'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'n/a'],
+   ['JS heap',h?(h.usedJSHeapSize/1048576).toFixed(0)+' MB':'n/a'],['Battery',b?Math.round(b.level*100)+'%'+(b.charging?' (charging)':''):'n/a'],
+   ['Public IP',t.ip||'n/a'],['Region',t.loc?t.loc+' · '+(t.colo||''):'n/a'],['Time zone',Intl.DateTimeFormat().resolvedOptions().timeZone]];
+  $('#vitals').innerHTML=rows.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}
+function draw(){const t=S.c.n+S.c.s+S.c.c;
+  $('#k-total').textContent=t.toLocaleString();$('#k-n').textContent=S.c.n.toLocaleString();$('#k-s').textContent=S.c.s;$('#k-c').textContent=S.c.c;
+  $('#k-lat').textContent=S.lat.length?med(S.lat)+' ms':'–';
+  const top=Object.entries(S.hosts).sort((a,b)=>b[1]-a[1]).slice(0,6),mx=top[0]?.[1]||1;
+  $('#hosts').innerHTML=top.map(([h,n])=>`<li><span>${esc(h)}</span><i style="width:${n/mx*100}%"></i>${n}</li>`).join('')||'<li class="muted">Waiting for traffic…</li>';
+  const {n,m,sd}=stats();$('#b-mean').textContent=n?m.toFixed(0)+' ms':'–';$('#b-sd').textContent=n?sd.toFixed(0)+' ms':'–';$('#b-n').textContent=n;
+  line($('#c-lat'),S.lat);scatter($('#c-sc'));renderTable();renderBlocked()}
+function renderTable(){const q=$('#q').value.toLowerCase(),s=$('#sev').value;
+  $('#tbody').innerHTML=S.flows.filter(f=>(s==='ALL'||f.status===s)&&(f.host+f.type+f.tag).toLowerCase().includes(q)).slice(0,25).map(f=>
+   `<tr><td>${f.time}</td><td>${esc(f.host)}</td><td>${esc(f.type)}</td><td>${esc(f.proto)}</td><td>${f.bytes.toLocaleString()}</td><td>${f.dur}</td><td class="${f.status}">${f.score}</td>
+   <td><span class="tag ${f.status}">${f.status==='HIGH'?'CRITICAL':f.status}${f.sim?' · SIM':''}</span></td><td><button class="ghost" onclick="inspect('${f.id}')">Inspect</button></td></tr>`).join('')}
+function inspect(id){const f=S.flows.find(x=>x.id===id);if(!f)return;
+  $('#modal-body').innerHTML=`<h3>${esc(f.host)}</h3><p class="muted">${f.id} · ${f.time}${f.sim?' · simulated event':''}</p><pre>${esc(JSON.stringify(f,null,2))}</pre>`;$('#modal').showModal()}
+function alertItem(f){const a=$('#alerts');if(a.querySelector('p'))a.innerHTML='';
+  const d=document.createElement('div');d.className='alert';
+  d.innerHTML=`<b>${esc(f.tag||'Anomalous timing')}</b> · ${esc(f.host)}<br><small style="margin:0">${f.time} · score ${f.score}</small><br><button class="ghost" onclick="block('${esc(f.host)}','${esc(f.tag||'Anomaly')}')">Block host</button>`;
+  a.prepend(d);while(a.children.length>8)a.lastChild.remove()}
+function block(host,reason){if(S.blocked.some(b=>b.host===host))return;S.blocked.push({host,reason,hosts:`0.0.0.0 ${host}`});renderBlocked()}
+function renderBlocked(){if(!S.blocked.length)return;$('#qbody').innerHTML=S.blocked.map(b=>`<tr><td>${esc(b.host)}</td><td>${esc(b.reason)}</td><td>${esc(b.hosts)}</td><td><span class="tag HIGH">LISTED</span></td></tr>`).join('')}
+function exportReport(){const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(S.blocked,null,2));a.download='sentinel_report.json';a.click()}
+function addRule(e){e.preventDefault();S.rules.push({id:'R-'+(S.rules.length+1),name:$('#r-name').value,field:$('#r-field').value,val:$('#r-val').value});e.target.reset();renderRules()}
+function renderRules(){const L={dur:'time (ms) >',bytes:'bytes >',host:'host contains'};
+  $('#rbody').innerHTML=S.rules.map(r=>`<tr><td>${r.id}</td><td>${esc(r.name)}</td><td>${L[r.field]} ${esc(r.val)}</td><td><button class="ghost" onclick="S.rules=S.rules.filter(x=>x.id!=='${r.id}');renderRules()">Remove</button></td></tr>`).join('')}
 
-function toggleStream() {
-    streamActive = !streamActive;
-    document.getElementById('stream-status').innerText = streamActive ? 'ACTIVE' : 'PAUSED';
-}
-
-function generateRandomFlow(forcedType = null) {
-    const ips = ['192.168.1.105', '192.168.1.112', '10.0.4.22'];
-    const extIps = ['185.220.101.5', '45.33.32.156', '198.51.100.42'];
-    
-    let proto = 'TCP';
-    let srcIp = extIps[Math.floor(Math.random() * extIps.length)];
-    let dstIp = ips[Math.floor(Math.random() * ips.length)];
-    let dstPort = [80, 443, 22, 53][Math.floor(Math.random() * 4)];
-    let packets = Math.floor(Math.random() * 30) + 2;
-    let bytes = packets * 120;
-    let attackTag = 'NORMAL';
-
-    if (forcedType === 'syn_flood' || (!forcedType && Math.random() < 0.15)) {
-        packets = Math.floor(Math.random() * 300) + 150;
-        attackTag = 'SYN Flood Attack';
-    } else if (forcedType === 'port_scan') {
-        dstPort = Math.floor(Math.random() * 1000) + 20;
-        attackTag = 'Port Scan';
-    } else if (forcedType === 'ssh_brute') {
-        dstPort = 22;
-        packets = 60;
-        attackTag = 'SSH Brute Force';
-    }
-
-    const score = parseFloat(Math.min(1.0, (packets / 250) + Math.random() * 0.2).toFixed(2));
-    let status = score >= sensitivityThreshold ? (score > 0.8 ? 'HIGH' : 'SUSPICIOUS') : 'NORMAL';
-
-    return {
-        id: 'FL-' + Math.floor(Math.random() * 90000 + 10000),
-        time: new Date().toLocaleTimeString(),
-        srcIp, dstIp, proto, dstPort, packets, bytes,
-        score, status, attackTag
-    };
-}
-
-function processFlow(flow) {
-    totalFlows++;
-    if (flow.status === 'NORMAL') normalFlows++;
-    else if (flow.status === 'SUSPICIOUS') suspiciousFlows++;
-    else criticalFlows++;
-
-    document.getElementById('kpi-total-flows').innerText = totalFlows.toLocaleString();
-    document.getElementById('kpi-normal-flows').innerText = normalFlows.toLocaleString();
-    document.getElementById('kpi-suspicious-flows').innerText = suspiciousFlows.toLocaleString();
-    document.getElementById('kpi-critical-flows').innerText = criticalFlows.toLocaleString();
-
-    flowHistory.unshift(flow);
-    if (flowHistory.length > 30) flowHistory.pop();
-
-    renderTelemetryTable();
-    if (flow.status === 'HIGH') addAlertFeedItem(flow);
-}
-
-function renderTelemetryTable() {
-    const tbody = document.getElementById('telemetry-table-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = flowHistory.slice(0, 7).map(f => `
-        <tr class="hover:bg-slate-50">
-            <td class="p-3 text-slate-500">${f.time}</td>
-            <td class="p-3 font-semibold text-slate-800">${f.srcIp}</td>
-            <td class="p-3 text-slate-500">${f.dstIp}</td>
-            <td class="p-3 text-slate-600">${f.proto}</td>
-            <td class="p-3 text-slate-600">${f.dstPort}</td>
-            <td class="p-3 text-slate-600">${f.packets}</td>
-            <td class="p-3 text-slate-600">${f.bytes}</td>
-            <td class="p-3 font-bold ${f.score > 0.65 ? 'text-rose-600' : 'text-emerald-600'}">${f.score}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ${f.status === 'HIGH' ? 'bg-rose-100 text-rose-700' : (f.status === 'SUSPICIOUS' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')}">${f.status}</span></td>
-            <td class="p-3 text-right">
-                <button onclick='inspectFlow(${JSON.stringify(f)})' class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] border border-slate-300">Inspect</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function addAlertFeedItem(f) {
-    const feed = document.getElementById('alert-feed');
-    if (!feed) return;
-
-    const item = document.createElement('div');
-    item.className = 'p-2.5 rounded bg-rose-50 border border-rose-200 space-y-1';
-    item.innerHTML = `
-        <div class="flex justify-between font-bold text-rose-700">
-            <span>🚨 ${f.attackTag}</span>
-            <span class="text-[10px] text-slate-500">${f.time}</span>
-        </div>
-        <p class="text-slate-700 text-[11px]">SRC: ${f.srcIp} -> Port: ${f.dstPort}</p>
-        <button onclick="quarantineIP('${f.srcIp}', '${f.attackTag}')" class="mt-1 px-2 py-0.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded text-[10px] shadow-sm">Quarantine IP</button>
-    `;
-    feed.prepend(item);
-    if (feed.children.length > 4) feed.removeChild(feed.lastChild);
-}
-
-function injectAttack(type) {
-    processFlow(generateRandomFlow(type));
-}
-
-function updateSensitivityThreshold(val) {
-    sensitivityThreshold = parseFloat(val);
-    document.getElementById('threshold-val-label').innerText = val;
-}
-
-function quarantineIP(ip, reason) {
-    if (quarantinedIPs.some(q => q.ip === ip)) return;
-    quarantinedIPs.push({
-        ip, reason,
-        iptables: `sudo iptables -A INPUT -s ${ip} -j DROP`,
-        ufw: `sudo ufw deny from ${ip}`
-    });
-    renderQuarantineTable();
-    alert(`IP ${ip} Quarantined!`);
-}
-
-function renderQuarantineTable() {
-    const tbody = document.getElementById('quarantine-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = quarantinedIPs.map(q => `
-        <tr class="hover:bg-slate-50">
-            <td class="p-3 text-rose-600 font-bold">${q.ip}</td>
-            <td class="p-3 text-slate-700">${q.reason}</td>
-            <td class="p-3 text-slate-600 font-mono bg-slate-50 rounded">${q.iptables}</td>
-            <td class="p-3 text-slate-600 font-mono bg-slate-50 rounded">${q.ufw}</td>
-            <td class="p-3 text-right"><span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded font-semibold text-[10px]">ENFORCED</span></td>
-        </tr>
-    `).join('');
-}
-
-function renderRulesTable() {
-    const tbody = document.getElementById('rules-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = activeRules.map(r => `
-        <tr class="hover:bg-slate-50">
-            <td class="p-2.5 font-bold text-slate-700">${r.id}</td>
-            <td class="p-2.5 text-slate-800">${r.name}</td>
-            <td class="p-2.5 text-slate-600">${r.proto}</td>
-            <td class="p-2.5 text-emerald-700 font-mono">${r.condition}</td>
-            <td class="p-2.5"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded font-semibold text-[10px]">ACTIVE</span></td>
-        </tr>
-    `).join('');
-}
-
-function initPlots() {
-    Plotly.newPlot('chart-flow-rate', [{
-        y: [12, 18, 15, 24, 30, 85, 40, 22, 19, 25],
-        type: 'scatter', mode: 'lines+markers',
-        line: { color: '#0284c7', width: 2 },
-        marker: { color: '#0369a1', size: 6 }
-    }], {
-        margin: { t: 10, r: 10, l: 30, b: 30 },
-        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-        xaxis: { color: '#64748b', gridcolor: '#f1f5f9' },
-        yaxis: { color: '#64748b', gridcolor: '#f1f5f9' }
-    }, { responsive: true });
-
-    Plotly.newPlot('chart-threat-pie', [{
-        values: [75, 12, 8, 5],
-        labels: ['Normal', 'SYN Floods', 'Port Scans', 'Brute Force'],
-        type: 'pie',
-        marker: { colors: ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6'] }
-    }], {
-        margin: { t: 10, r: 10, l: 10, b: 10 },
-        paper_bgcolor: 'transparent',
-        legend: { font: { color: '#475569' } }
-    }, { responsive: true });
-
-    Plotly.newPlot('chart-scatter-space', [{
-        x: [10, 25, 15, 30, 220, 180],
-        y: [500, 1200, 800, 1500, 15000, 12000],
-        mode: 'markers', type: 'scatter',
-        marker: { size: 10, color: ['#10b981', '#10b981', '#10b981', '#10b981', '#ef4444', '#ef4444'] }
-    }], {
-        margin: { t: 10, r: 10, l: 40, b: 30 },
-        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-        xaxis: { title: 'Packet Count', color: '#64748b', gridcolor: '#f1f5f9' },
-        yaxis: { title: 'Total Bytes', color: '#64748b', gridcolor: '#f1f5f9' }
-    }, { responsive: true });
-}
-
-function initTopologyCanvas() {
-    const canvas = document.getElementById('topology-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = canvas.parentElement.clientHeight;
-
-    ctx.fillStyle = '#0284c7';
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 12, 0, Math.PI * 2);
-    ctx.fill();
-}
-
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-function inspectFlow(f) {
-    document.getElementById('modal-flow-content').innerHTML = `
-        <p>Flow ID: ${f.id} | Score: ${f.score}</p>
-        <p>SRC: ${f.srcIp} -> DST: ${f.dstIp}:${f.dstPort}</p>
-        <pre class="bg-slate-100 p-2 text-slate-800 font-mono mt-2 border border-slate-200 rounded">
-0000  45 00 00 3c 1c 46 40 00  40 06 b1 e6 c0 a8 01 69
-0010  c0 a8 01 01 00 16 00 50  00 00 00 00 00 00 00 00
-        </pre>
-    `;
-    openModal('modal-flow-inspect');
-}
+/* ---------- canvas charts ---------- */
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=devicePixelRatio||1,w=c.clientWidth,h=+c.getAttribute('height');c.width=w*r;c.height=h*r;const x=c.getContext('2d');x.scale(r,r);x.clearRect(0,0,w,h);x.font='11px IBM Plex Mono,monospace';return{x,w,h}}
+function line(c,d){if(!c||!c.clientWidth)return;const{x,w,h}=setup(c),p=30;x.strokeStyle=css('--line');x.fillStyle=css('--fade');
+  const mx=Math.max(100,...d)*1.1;for(let i=0;i<=3;i++){const y=h-p-(h-p-8)*i/3;x.beginPath();x.moveTo(p+10,y);x.lineTo(w,y);x.stroke();x.fillText(Math.round(mx*i/3),0,y+4)}
+  if(d.length<2)return x.fillText('Collecting samples…',p+20,h/2);
+  x.beginPath();d.forEach((v,i)=>{const X=p+10+(w-p-14)*i/59,Y=h-p-(h-p-8)*v/mx;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.strokeStyle=css('--brown');x.lineWidth=2;x.stroke()}
+function scatter(c){if(!c||!c.clientWidth)return;const{x,w,h}=setup(c),p=36,f=S.flows.slice(0,120);x.strokeStyle=css('--line');x.fillStyle=css('--fade');
+  x.strokeRect(p,6,w-p-8,h-p-6);x.fillText('bytes (log) →',w-100,h-8);x.fillText('ms ↑',2,14);
+  const my=Math.max(100,...f.map(a=>a.dur))*1.1,lg=v=>Math.log10(v+10);const mxb=Math.max(4,...f.map(a=>lg(a.bytes)));
+  f.forEach(a=>{x.fillStyle=css(a.status==='HIGH'?'--bad':a.status==='SUSPICIOUS'?'--warn':'--ok');x.globalAlpha=.75;x.beginPath();
+    x.arc(p+4+(w-p-16)*lg(a.bytes)/mxb,h-p-2-(h-p-14)*a.dur/my,4,0,7);x.fill()});x.globalAlpha=1}
+addEventListener('resize',draw);
+boot();
