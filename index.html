@@ -12,105 +12,107 @@
 
 <!-- AUTH -->
 <main id="auth" class="auth hidden">
-  <section class="auth-art">
-    <h1>Sentinel</h1>
-    <p>A quiet look at what your machine is saying to the network, as it happens.</p>
-    <small>Live data comes from your own browser: real requests, real timings, real device status.</small>
-  </section>
-  <section class="auth-box">
-    <div class="seg"><button id="t-in" class="on" onclick="authMode('in')">Sign in</button><button id="t-up" onclick="authMode('up')">Create account</button></div>
-    <form id="f-in" onsubmit="signIn(event)">
-      <label>Email<input id="in-email" type="email" required autocomplete="email"></label>
-      <label>Password<input id="in-pass" type="password" required autocomplete="current-password"></label>
-      <p class="err" id="in-err"></p>
-      <button class="btn">Sign in</button>
-    </form>
-    <form id="f-up" class="hidden" onsubmit="signUp(event)">
-      <label>Full name<input id="up-name" required autocomplete="name"></label>
-      <label>Email<input id="up-email" type="email" required autocomplete="email"></label>
-      <label>Password <em>(8+ characters)</em><input id="up-pass" type="password" minlength="8" required autocomplete="new-password"></label>
-      <label>Confirm password<input id="up-pass2" type="password" required autocomplete="new-password"></label>
-      <p class="err" id="up-err"></p>
-      <button class="btn">Create account</button>
-    </form>
-    <p class="note">Accounts are stored only in this browser (hashed with a salt). Fine for a project demo, not a substitute for a server login.</p>
-  </section>
+<section class="auth-art">
+<h1>Sentinel</h1>
+<p>A quiet look at what your machine is saying to the network, as it happens.</p>
+<small>Live data comes from your own browser: real requests, real timings, real device status.</small>
+</section>
+<section class="auth-box">
+<div class="seg"><button id="t-in" class="on" onclick="authMode('in')">Sign in</button><button id="t-up" onclick="authMode('up')">Create account</button></div>
+<form id="f-in" onsubmit="signIn(event)">
+<label>Email<input id="in-email" type="email" required autocomplete="email"></label>
+<label>Password<input id="in-pass" type="password" required autocomplete="current-password"></label>
+<p class="err" id="in-err"></p>
+<button class="btn">Sign in</button>
+</form>
+<form id="f-up" class="hidden" onsubmit="signUp(event)">
+<label>Full name<input id="up-name" required autocomplete="name"></label>
+<label>Email<input id="up-email" type="email" required autocomplete="email"></label>
+<label>Password <em>(8+ characters)</em><input id="up-pass" type="password" minlength="8" required autocomplete="new-password"></label>
+<label>Confirm password<input id="up-pass2" type="password" required autocomplete="new-password"></label>
+<p class="err" id="up-err"></p>
+<button class="btn">Create account</button>
+</form>
+<p class="note">Accounts are stored only in this browser (hashed with a salt). Fine for a project demo, not a substitute for a server login.</p>
+</section>
 </main>
 
 <!-- APP -->
 <div id="app" class="hidden">
 <header class="top">
-  <div class="brand">Sentinel<span id="live-dot" class="dot"></span></div>
-  <nav>
-    <button class="tab on" data-tab="overview">Overview</button>
-    <button class="tab" data-tab="traffic">Traffic</button>
-    <button class="tab" data-tab="engine">Detection</button>
-    <button class="tab" data-tab="rules">Rules</button>
-    <button class="tab" data-tab="response">Response</button>
-  </nav>
-  <div class="who"><span id="who"></span>
-    <button class="ghost" id="pause" onclick="toggle()">Pause</button>
-    <button class="ghost" onclick="signOut()">Sign out</button></div>
+<div class="brand">Sentinel<span id="live-dot" class="dot"></span></div>
+<nav>
+<button class="tab on" data-tab="overview">Overview</button>
+<button class="tab" data-tab="traffic">Traffic</button>
+<button class="tab" data-tab="engine">Detection</button>
+<button class="tab" data-tab="rules">Rules</button>
+<button class="tab" data-tab="response">Response</button>
+</nav>
+<div class="who"><span id="who"></span>
+<button class="ghost" id="pause" onclick="toggle()">Pause</button>
+<button class="ghost" onclick="signOut()">Sign out</button></div>
 </header>
 
 <main class="wrap">
 <section id="v-overview" class="view">
-  <div class="kpis">
-    <div class="kpi"><span>Requests observed</span><b id="k-total">0</b></div>
-    <div class="kpi"><span>Normal</span><b id="k-n">0</b></div>
-    <div class="kpi"><span>Suspicious</span><b id="k-s" class="warn">0</b></div>
-    <div class="kpi"><span>Critical</span><b id="k-c" class="bad">0</b></div>
-    <div class="kpi"><span>Median latency</span><b id="k-lat">–</b></div>
-  </div>
-  <div class="grid2">
-    <div class="card"><h3>Anomaly score <small>last 60 requests</small></h3><canvas id="c-score" height="210"></canvas></div>
-    <div class="card"><h3>This machine</h3><dl id="vitals" class="vitals"></dl></div>
-  </div>
-  <div class="grid2">
-    <div class="card"><h3>Busiest hosts <small>by requests</small></h3><ul id="hosts" class="hosts"></ul></div>
-    <div class="card"><h3>Alerts</h3><div id="alerts" class="alerts"><p class="muted">Nothing flagged yet.</p></div></div>
-  </div>
-  <div class="card sim"><div><h3>Test the detector</h3><p class="muted">Adds clearly labelled simulated events, so you can see how rules and scoring react.</p></div>
-    <div><button class="ghost" onclick="inject('flood')">Request flood</button><button class="ghost" onclick="inject('exfil')">Large upload</button><button class="ghost" onclick="inject('beacon')">Beaconing</button></div></div>
+<div class="kpis">
+<div class="kpi"><span>Requests observed</span><b id="k-total">0</b></div>
+<div class="kpi"><span>Normal</span><b id="k-n">0</b></div>
+<div class="kpi"><span>Suspicious</span><b id="k-s" class="warn">0</b></div>
+<div class="kpi"><span>Critical</span><b id="k-c" class="bad">0</b></div>
+<div class="kpi"><span>Median latency</span><b id="k-lat">–</b></div>
+</div>
+<div class="grid2">
+<div class="card"><h3>Anomaly score <small>last 60 requests</small></h3><canvas id="c-score" height="210"></canvas></div>
+<div class="card"><h3>This machine</h3><dl id="vitals" class="vitals"></dl></div>
+</div>
+<div class="grid2">
+<div class="card"><h3>Busiest hosts <small>by requests</small></h3><ul id="hosts" class="hosts"></ul></div>
+<div class="card"><h3>Alerts</h3><div id="alerts" class="alerts"><p class="muted">Nothing flagged yet.</p></div></div>
+</div>
+<div class="card sim"><div><h3>Test the detector</h3><p class="muted">Adds clearly labelled simulated events, so you can see how rules and scoring react.</p></div>
+<div><button class="ghost" onclick="inject('flood')">Request flood</button><button class="ghost" onclick="inject('exfil')">Large upload</button><button class="ghost" onclick="inject('beacon')">Beaconing</button></div></div>
 </section>
 
 <section id="v-traffic" class="view hidden">
-  <div class="card">
-    <div class="bar"><h3>Request log</h3>
-      <input id="q" placeholder="Filter by host or type" oninput="renderTable()">
-      <select id="sev" onchange="renderTable()"><option value="ALL">All</option><option value="HIGH">Critical</option><option value="SUSPICIOUS">Suspicious</option><option value="NORMAL">Normal</option></select></div>
-    <div class="scroll"><table><thead><tr><th>Time</th><th>Host</th><th>Type</th><th>Protocol</th><th>Bytes</th><th>Time (ms)</th><th>Score</th><th>Status</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
-  </div>
+<div class="card">
+<div class="bar"><h3>Request log</h3>
+<input id="q" placeholder="Filter by host or type" oninput="renderTable()">
+<select id="sev" onchange="renderTable()"><option value="ALL">All</option><option value="HIGH">Critical</option><option value="SUSPICIOUS">Suspicious</option><option value="NORMAL">Normal</option></select></div>
+<div class="scroll"><table><thead><tr><th>Time</th><th>Host</th><th>Type</th><th>Protocol</th><th>Bytes</th><th>Time (ms)</th><th>Score</th><th>Status</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+</div>
 </section>
 
 <section id="v-engine" class="view hidden">
-  <div class="grid2">
-    <div class="card"><h3>Sensitivity</h3>
-      <p class="muted">Scores come from how far a request’s timing and size drift from the rolling average of the last 40 requests. A lower cutoff flags more, including false alarms.</p>
-      <div class="row"><span>Cutoff</span><b id="thr-v">0.65</b></div>
-      <input type="range" id="thr" min="0.3" max="0.95" step="0.05" value="0.65" oninput="setThr(this.value)">
-      <div class="row muted"><span>0.30 aggressive</span><span>0.95 strict</span></div>
-      <dl class="vitals"><dt>Baseline mean</dt><dd id="b-mean">–</dd><dt>Baseline spread</dt><dd id="b-sd">–</dd><dt>Samples</dt><dd id="b-n">0</dd></dl></div>
-    <div class="card"><h3>Size vs. time <small>each dot is a request</small></h3><canvas id="c-sc" height="260"></canvas></div>
-  </div>
+<div class="grid2">
+<div class="card"><h3>Sensitivity</h3>
+<p class="muted">Scores come from how far a request’s timing and size drift from the rolling average of the last 40 requests. A lower cutoff flags more, including false alarms.</p>
+<div class="row"><span>Cutoff</span><b id="thr-v">0.65</b></div>
+<input type="range" id="thr" min="0.3" max="0.95" step="0.05" value="0.65" oninput="setThr(this.value)">
+<div class="row muted"><span>0.30 aggressive</span><span>0.95 strict</span></div>
+<dl class="vitals"><dt>Baseline mean</dt><dd id="b-mean">–</dd><dt>Baseline spread</dt><dd id="b-sd">–</dd><dt>Samples</dt><dd id="b-n">0</dd></dl></div>
+<div class="card">
+<h3>Anomaly score distribution <small>live</small></h3>
+<canvas id="c-sc" height="260"></canvas>
+</div>sssssss
 </section>
 
 <section id="v-rules" class="view hidden">
-  <div class="grid2">
-    <div class="card"><h3>Add a rule</h3>
-      <form onsubmit="addRule(event)" class="stack">
-        <label>Name<input id="r-name" required></label>
-        <label>When<select id="r-field"><option value="dur">response time (ms)</option><option value="bytes">bytes transferred</option><option value="host">host contains</option></select></label>
-        <label>Value<input id="r-val" required></label>
-        <button class="btn">Save rule</button></form></div>
-    <div class="card"><h3>Active rules</h3><div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Condition</th><th></th></tr></thead><tbody id="rbody"></tbody></table></div></div>
-  </div>
+<div class="grid2">
+<div class="card"><h3>Add a rule</h3>
+<form onsubmit="addRule(event)" class="stack">
+<label>Name<input id="r-name" required></label>
+<label>When<select id="r-field"><option value="dur">response time (ms)</option><option value="bytes">bytes transferred</option><option value="host">host contains</option></select></label>
+<label>Value<input id="r-val" required></label>
+<button class="btn">Save rule</button></form></div>
+<div class="card"><h3>Active rules</h3><div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Condition</th><th></th></tr></thead><tbody id="rbody"></tbody></table></div></div>
+</div>
 </section>
 
 <section id="v-response" class="view hidden">
-  <div class="card"><div class="bar"><h3>Blocked hosts</h3><button class="ghost" onclick="exportReport()">Export JSON</button></div>
-    <p class="muted">Sentinel can’t change your system. It writes the line you would add to your hosts file; run it yourself as administrator.</p>
-    <div class="scroll"><table><thead><tr><th>Host</th><th>Reason</th><th>Hosts-file entry</th><th></th></tr></thead><tbody id="qbody"><tr><td colspan="4" class="muted">No hosts blocked.</td></tr></tbody></table></div></div>
+<div class="card"><div class="bar"><h3>Blocked hosts</h3><button class="ghost" onclick="exportReport()">Export JSON</button></div>
+<p class="muted">Sentinel can’t change your system. It writes the line you would add to your hosts file; run it yourself as administrator.</p>
+<div class="scroll"><table><thead><tr><th>Host</th><th>Reason</th><th>Hosts-file entry</th><th></th></tr></thead><tbody id="qbody"><tr><td colspan="4" class="muted">No hosts blocked.</td></tr></tbody></table></div></div>
 </section>
 </main>
 
